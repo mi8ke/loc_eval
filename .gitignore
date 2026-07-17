@@ -1,0 +1,13 @@
+# Evaluation outputs (regenerable). The reference summary.csv is force-added.
+results/
+
+# Python / ROS build artifacts
+__pycache__/
+*.py[cod]
+build/
+install/
+log/
+
+# editor / OS
+*.swp
+.DS_Store

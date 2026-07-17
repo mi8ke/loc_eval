@@ -1,0 +1,29 @@
+# Convenience compose for the loc_eval benchmark container.
+#
+#   xhost +local:docker          # once on the host, to allow GUI (Gazebo/RViz)
+#   docker compose -f docker/docker-compose.yml build
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml exec loc_eval bash
+#
+# Results written under /ros2_ws/results in the container land in ./results on the host.
+services:
+  loc_eval:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: loc_eval:humble
+    container_name: loc_eval
+    # host networking keeps ROS 2 DDS discovery and X11 simple
+    network_mode: host
+    ipc: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - TURTLEBOT3_MODEL=burger
+      # Isolate DDS traffic from anything else on the host network:
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./results:/ros2_ws/results
+    # keep the container alive so you can `exec` multiple shells into it
+    command: ["sleep", "infinity"]
