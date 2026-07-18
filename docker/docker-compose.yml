@@ -15,7 +15,10 @@ services:
     container_name: loc_eval
     # host networking keeps ROS 2 DDS discovery and X11 simple
     network_mode: host
-    ipc: host
+    # Give Gazebo a large private /dev/shm. (Do NOT use `ipc: host`: it shares the
+    # Gazebo IPC/shared-memory namespace with the host, so a Gazebo already running
+    # on the host collides — "Entity already exists" / gzserver crashes.)
+    shm_size: "2gb"
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
