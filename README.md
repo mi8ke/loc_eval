@@ -66,9 +66,15 @@ loc_eval/
 ROS 2 Humble / Gazebo Classic / TurtleBot3。評価手法は apt から導入、`als_ros2` は
 ソース（[iASL-Gifu/als_ros2](https://github.com/iASL-Gifu/als_ros2)）。詳細は Dockerfile を参照。
 
-## 除外した手法
+## 評価候補と除外した手法
 
-`gmcl`（ROS1 のみ）と `iris_lama`（Humble 非対応ブランチのみ）は候補から除外。
+当初は 7 手法を評価候補として検討したが、次の 2 手法は **ROS 2 Humble で動作しない**ため
+評価対象から外し、上記 5 手法に絞った。
+
+- **gmcl** — 公式実装は ROS 1 のみで、ROS 2 Humble 向けの移植版が存在しない。
+- **iris_lama** — ROS 2 対応ブランチが dashing / eloquent 止まりで、Humble ではビルドできない。
+
+（同系統の ROS 2 代替として `beluga` や `emcl2_ros2` が候補になり得る。）
 
 ## ライセンス
 
