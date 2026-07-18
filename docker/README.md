@@ -126,13 +126,19 @@ ros2 run loc_eval eval_evo.sh \
 ## 6. GUI で観察する（任意）
 
 ```bash
-# ホストで一度: xhost +local:docker
+xhost +local:root                 # ホストで一度（コンテナのX11アクセスを許可）
 # シェルA:
 ros2 launch loc_eval gazebo_gt.launch.py gui:=true
 # 別シェル: RViz で map / scan / TF を確認
 rviz2
 ```
-`gui:=true` で Gazebo クライアントが立ち上がります（要 X11）。
+`gui:=true` で Gazebo クライアントが立ち上がります（要 X11）。compose は
+**CPU ソフトウェアレンダリング（llvmpipe）** を既定にしており、NVIDIA を含むどのホストでも
+動きます（描画は軽めですが観察には十分）。
+
+**NVIDIA GPU でハードウェアGL（滑らかに）したい場合**は、ホストに
+`nvidia-container-toolkit` を入れ、`docker-compose.yml` 内のコメント（`deploy:` ブロック）を
+有効化し、`LIBGL_ALWAYS_SOFTWARE` / `GALLIUM_DRIVER` 行を削除してください。
 
 ---
 
@@ -186,8 +192,12 @@ loc_eval/
 
 ## 9. トラブルシューティング
 
-- **GUI が出ない / `cannot connect to display`**：ホストで `xhost +local:docker` を実行。
+- **GUI が出ない / `cannot connect to display`**：ホストで `xhost +local:root` を実行。
   X11 が無い環境（サーバ等）では `gui:=false` のヘッドレスで評価してください。
+- **`gzclient` が `exit code -6` で死ぬ / `libGL error: failed to load driver: nouveau`**：
+  ホストが NVIDIA でコンテナ内に NVIDIA の GL ライブラリが無いのが原因。compose は
+  `LIBGL_ALWAYS_SOFTWARE=1`（ソフトウェアGL）を既定で設定済みで解消します。単発 `docker run`
+  で GUI を使う場合は `-e LIBGL_ALWAYS_SOFTWARE=1 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix` を付与してください。
 - **描画が重い / ソフトウェアレンダリング**：ヘッドレス評価（`gui:=false`）では GPU 不要。
   GUI で GPU を使う場合は `--gpus all` 等の追加設定を検討。
 - **他の ROS ノードと混線する**：`ROS_DOMAIN_ID`（compose では 42）を使い分ける。
