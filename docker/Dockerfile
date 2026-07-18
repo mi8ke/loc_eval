@@ -55,5 +55,16 @@ RUN source /opt/ros/humble/setup.bash \
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# `docker exec` / `docker compose exec` start bash directly (bypassing the entrypoint),
+# so also source everything from .bashrc for interactive shells.
+RUN printf '%s\n' \
+      'source /opt/ros/humble/setup.bash' \
+      'source /ros2_ws/install/setup.bash' \
+      '[ -f /usr/share/gazebo/setup.sh ] && source /usr/share/gazebo/setup.sh' \
+      'export GAZEBO_MODEL_DATABASE_URI=""' \
+      'export TURTLEBOT3_MODEL=burger' \
+      'export PATH="$HOME/.local/bin:$PATH"' \
+      >> /root/.bashrc
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

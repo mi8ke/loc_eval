@@ -199,6 +199,11 @@ loc_eval/
 - **`map_server` の GraphicsMagick エラー**：Docker では通常発生しません
   （ライブラリが正規の位置にあるため）。ローカル環境固有の対処が launch に入っていますが無害です。
 - **結果がホストに出ない**：out_dir を `/ros2_ws/results/...` にする（compose のマウント先）。
+- **`gzserver` が `exit code 255` で死ぬ / `spawn_entity` が待ち続ける**：Gazebo が
+  ベースモデル（sun, ground_plane）をローカルに見つけられず、オンラインのモデル DB を取得
+  しようとしてハングするのが原因。本イメージは `/usr/share/gazebo/setup.sh` を source し
+  `GAZEBO_MODEL_DATABASE_URI=""` を設定済みで解消しています。自作環境で再発する場合は、
+  シェルで `source /usr/share/gazebo/setup.sh` を実行してください。
 
 ---
 

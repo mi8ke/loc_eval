@@ -45,12 +45,20 @@ def generate_launch_description():
     gt_model = os.path.join(
         pkg_loc_eval, 'models', 'turtlebot3_burger_gt', 'model.sdf')
 
-    # turtlebot3_common meshes (model:// URIs) and our GT model must be on the path.
+    # turtlebot3_common meshes (model:// URIs) and our GT model must be on the path,
+    # plus Gazebo's own base models (sun, ground_plane) — otherwise Gazebo falls back to
+    # the online model database and gzserver hangs / dies (exit 255), which is the usual
+    # failure inside an offline container.
+    import glob
+    base_model_dirs = ':'.join(glob.glob('/usr/share/gazebo-*/models'))
+    model_path = os.path.join(pkg_tb3_gazebo, 'models') + ':' + \
+        os.path.join(pkg_loc_eval, 'models')
+    if base_model_dirs:
+        model_path += ':' + base_model_dirs
     set_tb3_model = SetEnvironmentVariable('TURTLEBOT3_MODEL', 'burger')
-    add_model_path = AppendEnvironmentVariable(
-        'GAZEBO_MODEL_PATH',
-        os.path.join(pkg_tb3_gazebo, 'models') + ':' +
-        os.path.join(pkg_loc_eval, 'models'))
+    add_model_path = AppendEnvironmentVariable('GAZEBO_MODEL_PATH', model_path)
+    # Never reach out to the online model DB — everything needed is local.
+    no_online_db = SetEnvironmentVariable('GAZEBO_MODEL_DATABASE_URI', '')
 
     gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -82,6 +90,7 @@ def generate_launch_description():
         DeclareLaunchArgument('gui', default_value='true'),
         set_tb3_model,
         add_model_path,
+        no_online_db,
         gzserver,
         gzclient,
         robot_state_publisher,
